@@ -14,7 +14,7 @@ app.use(cors())
 var morgan = require('morgan')
 
 app.use(morgan(function (tokens, req, res) {
-  if (tokens.method(req, res) === "POST") {
+  if (tokens.method(req, res) === 'POST') {
     return [
       tokens.method(req, res),
       tokens.url(req, res),
@@ -50,25 +50,25 @@ app.get('/info', (request, response, next) => {
 })
 
 app.get('/api/persons', (request, response) => {
-	console.log("Getting all persons")
-	Person.find({}).then(persons => {
-	  response.json(persons.map(person => person.toJSON()))
-	});
-});
+  console.log('Getting all persons')
+  Person.find({}).then(persons => {
+    response.json(persons.map(person => person.toJSON()))
+  })
+})
 
 app.post('/api/persons', (request, response, next) => {
-	const body = request.body
-  
-	const person = new Person({
-	  name: body.name,
-	  number: body.number
-	})
-  
+  const body = request.body
+
+  const person = new Person({
+    name: body.name,
+    number: body.number
+  })
+
   person
     .save()
     .then(savedPerson => savedPerson.toJSON())
     .then(savedAndFormattedPerson => {
-	    response.json(savedAndFormattedPerson)
+      response.json(savedAndFormattedPerson)
     })
     .catch(error => next(error))
 })
@@ -87,41 +87,41 @@ app.get('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
-    .then(result => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-	const body = request.body
-  
-	const person = {
-	  number: body.number,
-	}
-  
-	Person.findByIdAndUpdate(request.params.id, person, { new: true })
-	  .then(updatedNote => {
-		response.json(updatedNote.toJSON())
-	  })
-	.catch(error => next(error))
+  const body = request.body
+
+  const person = {
+    number: body.number,
+  }
+
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then(updatedNote => {
+      response.json(updatedNote.toJSON())
+    })
+    .catch(error => next(error))
 })
 
 const errorHandler = (error, request, response, next) => {
-	console.error(error.message)
-  
-	if (error.name === 'CastError') {
-	  return response.status(400).send({ error: 'malformatted id' })
-	} else if (error.name === 'ValidationError') {
-	  return response.status(400).json({ error: error.message })
-	}
-  
-	next(error)
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  }
+
+  next(error)
 }
 
 app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-	console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on port ${PORT}`)
 })

@@ -1,17 +1,17 @@
 const mongoose = require('mongoose')
 
 // Remove Deprecation Warnings
-mongoose.set('useCreateIndex', true);
-mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true)
+mongoose.set('useFindAndModify', false)
 
-var uniqueValidator = require('mongoose-unique-validator');
+var uniqueValidator = require('mongoose-unique-validator')
 
 const url = process.env.MONGODB_URI
 
 console.log('connecting to', url)
 
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(result => {
+  .then(() => {
     console.log('connected to MongoDB')
   })
   .catch((error) => {
@@ -19,16 +19,21 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
   })
 
 const personSchema = new mongoose.Schema({
-  name:   { 
-	type: String, 
-	required: true, 
-	minlength: 3, 
-	unique: true
+  name:   {
+    type: String,
+    required: true,
+    minlength: 3,
+    unique: true
   },
-  number: { 
-	type: String, 
-	required: true,
-	minlength: 8,
+  number: {
+    type: String,
+    validate: {
+      validator: function(v) {
+        return /(\d.*){8}/.test(v)
+      },
+      message: () => 'phone number must contain at least 8 digits'
+    },
+    required: true,
   },
 })
 
@@ -40,6 +45,6 @@ personSchema.set('toJSON', {
   }
 })
 
-personSchema.plugin(uniqueValidator);
+personSchema.plugin(uniqueValidator)
 
 module.exports = mongoose.model('Person', personSchema)
