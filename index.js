@@ -35,6 +35,20 @@ app.use(morgan(function (tokens, req, res) {
 }))
 // ------------
 
+app.get('/info', (request, response, next) => {
+  Person.countDocuments({}, (error, result) => {
+    if (error) {
+      next(error)
+    } else {
+      console.log(result)
+      response.send(
+        `<div>Phonebook has info for ${result} people</div>
+        <div>${new Date().toString()}</div>`
+      )
+    }
+  })
+})
+
 app.get('/api/persons', (request, response) => {
 	console.log("Getting all persons")
 	Person.find({}).then(persons => {
@@ -63,10 +77,16 @@ app.post('/api/persons', (request, response) => {
 	})
 })
 
-app.get('/api/persons/:id', (request, response) => {
-	Person.findById(request.params.id).then(person => {
-	  response.json(person.toJSON())
-	})
+app.get('/api/persons/:id', (request, response, next) => {
+  Person.findById(request.params.id)
+    .then(person => {
+      if (person) {
+        response.json(person.toJSON())
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
